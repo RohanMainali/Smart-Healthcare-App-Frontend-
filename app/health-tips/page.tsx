@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Search, BookOpen, Heart, Droplet, Shield, Utensils } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AppLayout from "@/components/app-layout"
 
 const categories = [
@@ -44,33 +44,11 @@ const healthTips = [
     content:
       "Include fruits, vegetables, whole grains, lean proteins, and dairy in your daily diet. Limit processed foods, sugars, and excessive salt.",
   },
-  {
-    id: 5,
-    title: "Safe Drinking Water",
-    category: "hygiene",
-    content:
-      "Boil water for at least one minute or use water purification tablets if clean drinking water is not available.",
-  },
-  {
-    id: 6,
-    title: "Preventing Diarrhea",
-    category: "prevention",
-    content:
-      "Wash hands before handling food, cook food thoroughly, and store food at proper temperatures to prevent foodborne illnesses.",
-  },
 ]
 
 export default function HealthTipsPage() {
-  const [activeCategory, setActiveCategory] = useState("all")
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
-
-  const filteredTips = healthTips.filter((tip) => {
-    const matchesCategory = activeCategory === "all" || tip.category === activeCategory
-    const matchesSearch =
-      tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tip.content.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -102,62 +80,86 @@ export default function HealthTipsPage() {
           />
         </div>
 
-        <Tabs defaultValue="all" value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList className="w-full justify-start overflow-x-auto bg-blue-50 p-1 rounded-xl h-14">
-            {categories.map((category) => (
-              <TabsTrigger
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {categories
+            .filter((cat) => cat.id !== "all")
+            .map((category) => (
+              <Card
                 key={category.id}
-                value={category.id}
-                className="flex items-center rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm h-12"
+                className="border-none shadow-md rounded-2xl overflow-hidden card-hover cursor-pointer"
+                onClick={() => router.push(`/health-tips/${category.id}`)}
               >
-                <category.icon className="h-5 w-5 mr-2" />
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value={activeCategory} className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredTips.length > 0 ? (
-                filteredTips.map((tip) => (
-                  <Card key={tip.id} className="border-none shadow-md rounded-2xl overflow-hidden card-hover">
-                    <CardContent className="p-0">
-                      <div className="p-5">
-                        <div className="flex items-center mb-3">
-                          <div className={`rounded-lg p-2 mr-3 ${getCategoryColor(tip.category)}`}>
-                            {tip.category === "hygiene" && <Droplet className="h-5 w-5" />}
-                            {tip.category === "prevention" && <Shield className="h-5 w-5" />}
-                            {tip.category === "firstaid" && <Heart className="h-5 w-5" />}
-                            {tip.category === "nutrition" && <Utensils className="h-5 w-5" />}
-                          </div>
-                          <h3 className="font-semibold text-lg">{tip.title}</h3>
-                        </div>
-                        <p className="text-gray-600">{tip.content}</p>
+                <CardContent className="p-0">
+                  <div className="p-5">
+                    <div className="flex items-center mb-3">
+                      <div className={`rounded-lg p-2 mr-3 ${getCategoryColor(category.id)}`}>
+                        <category.icon className="h-5 w-5" />
                       </div>
-                      <div
-                        className={`h-1 w-full ${
-                          tip.category === "hygiene"
-                            ? "bg-blue-500"
-                            : tip.category === "prevention"
-                              ? "bg-green-500"
-                              : tip.category === "firstaid"
-                                ? "bg-red-500"
-                                : tip.category === "nutrition"
-                                  ? "bg-orange-500"
-                                  : "bg-primary"
-                        }`}
-                      ></div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-2 text-center py-10 bg-white rounded-2xl shadow-sm">
-                  <p className="text-gray-600">No health tips found. Try a different search.</p>
+                      <h3 className="font-semibold text-lg">{category.name}</h3>
+                    </div>
+                    <p className="text-gray-600">
+                      {category.id === "hygiene" && "Personal cleanliness tips"}
+                      {category.id === "prevention" && "Disease prevention advice"}
+                      {category.id === "firstaid" && "Emergency treatment guides"}
+                      {category.id === "nutrition" && "Healthy eating information"}
+                    </p>
+                  </div>
+                  <div
+                    className={`h-1 w-full ${
+                      category.id === "hygiene"
+                        ? "bg-blue-500"
+                        : category.id === "prevention"
+                          ? "bg-green-500"
+                          : category.id === "firstaid"
+                            ? "bg-red-500"
+                            : category.id === "nutrition"
+                              ? "bg-orange-500"
+                              : "bg-primary"
+                    }`}
+                  ></div>
+                </CardContent>
+              </Card>
+            ))}
+        </div>
+
+        <h2 className="text-xl font-semibold pt-2">Recent Tips</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {healthTips.slice(0, 4).map((tip) => (
+            <Card
+              key={tip.id}
+              className="border-none shadow-md rounded-2xl overflow-hidden card-hover cursor-pointer"
+              onClick={() => router.push(`/health-tips/${tip.category}`)}
+            >
+              <CardContent className="p-0">
+                <div className="p-5">
+                  <div className="flex items-center mb-3">
+                    <div className={`rounded-lg p-2 mr-3 ${getCategoryColor(tip.category)}`}>
+                      {tip.category === "hygiene" && <Droplet className="h-5 w-5" />}
+                      {tip.category === "prevention" && <Shield className="h-5 w-5" />}
+                      {tip.category === "firstaid" && <Heart className="h-5 w-5" />}
+                      {tip.category === "nutrition" && <Utensils className="h-5 w-5" />}
+                    </div>
+                    <h3 className="font-semibold text-lg">{tip.title}</h3>
+                  </div>
+                  <p className="text-gray-600 line-clamp-2">{tip.content}</p>
                 </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+                <div
+                  className={`h-1 w-full ${
+                    tip.category === "hygiene"
+                      ? "bg-blue-500"
+                      : tip.category === "prevention"
+                        ? "bg-green-500"
+                        : tip.category === "firstaid"
+                          ? "bg-red-500"
+                          : tip.category === "nutrition"
+                            ? "bg-orange-500"
+                            : "bg-primary"
+                  }`}
+                ></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </AppLayout>
   )
