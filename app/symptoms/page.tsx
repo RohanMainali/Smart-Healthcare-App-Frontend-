@@ -26,6 +26,15 @@ export default function SymptomsPage() {
 
   const handleStartCheck = () => {
     if (inputValue.trim() || selectedSymptoms.length > 0) {
+      // Store the symptoms data to use in the chat
+      localStorage.setItem(
+        "symptoms",
+        JSON.stringify({
+          text: inputValue,
+          selected: selectedSymptoms,
+        }),
+      )
+
       router.push("/symptoms/chat")
     }
   }
@@ -91,7 +100,10 @@ export default function SymptomsPage() {
 
         <div className="space-y-3">
           <h2 className="font-semibold text-lg">Recent Health Checks</h2>
-          <Card className="border-none shadow-md rounded-2xl overflow-hidden card-hover">
+          <Card
+            className="border-none shadow-md rounded-2xl overflow-hidden card-hover cursor-pointer"
+            onClick={() => router.push("/symptoms/history/1")}
+          >
             <CardContent className="p-5">
               <div className="flex justify-between items-center">
                 <div>
@@ -104,7 +116,10 @@ export default function SymptomsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-none shadow-md rounded-2xl overflow-hidden card-hover">
+          <Card
+            className="border-none shadow-md rounded-2xl overflow-hidden card-hover cursor-pointer"
+            onClick={() => router.push("/symptoms/history/2")}
+          >
             <CardContent className="p-5">
               <div className="flex justify-between items-center">
                 <div>
